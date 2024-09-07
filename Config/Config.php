@@ -16,14 +16,14 @@ const SIGNER = "YOUR_SIGNER";
 /**
  * Directorios de la APP
  */
-define('DS', DIRECTORY_SEPARATOR);
+const DS = DIRECTORY_SEPARATOR;
 define('ROOT', dirname(__DIR__));
-define('VENDOR', ROOT . DS . 'vendor');
-define('CONTROLLER', ROOT . DS . 'Controllers');
+const VENDOR = ROOT . DS . 'vendor';
+const CONTROLLER = ROOT . DS . 'Controllers';
 
 /**
  * Controlador, Método & Error por defecto
  */
-define('CONTROLLER_DEFAULT', 'Login');
-define('METHOD_DEFAULT', 'index');
-define('CONTROLLER_ERROR', 'Error404');
+const CONTROLLER_DEFAULT = 'Login';
+const METHOD_DEFAULT = 'index';
+const CONTROLLER_ERROR = 'Error404';
