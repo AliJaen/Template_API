@@ -7,12 +7,17 @@ class Venta extends Model
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public static function findAll(): array
     {
         $sql = "SELECT v.*, c.*
                 FROM venta AS v
                 LEFT JOIN cliente AS c ON v.cliente = c.id_cliente";
         $ventasData = parent::query($sql);
+
+        $ventas = [];
 
         foreach ($ventasData as $data) {
             $ventasDTO = parent::mapToDTO($data, VentaDTO::class);
@@ -29,6 +34,10 @@ class Venta extends Model
         return $ventas;
     }
 
+    /**
+     * @param int $ventaID
+     * @return VentaDTO|false
+     */
     public static function findByID(int $ventaID): VentaDTO | false
     {
         $sql = "SELECT v.*, c.*
@@ -52,7 +61,11 @@ class Venta extends Model
         return $ventaDTO;
     }
 
-    private static function findProductosVenta($ventaID)
+    /**
+     * @param $ventaID
+     * @return array
+     */
+    private static function findProductosVenta($ventaID): array
     {
         $sql = "SELECT vp.*, p.*, c.*
                 FROM venta_producto AS vp
@@ -80,6 +93,11 @@ class Venta extends Model
         return $ventasProducto;
     }
 
+    /**
+     * @param VentaDTO $ventaDTO
+     * @return string|false
+     * @throws Exception
+     */
     public static function createVenta(VentaDTO $ventaDTO): string | false
     {
         try {

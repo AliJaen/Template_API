@@ -1,6 +1,8 @@
 <?php
 
 // Configuración CORS
+use JetBrains\PhpStorm\NoReturn;
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -18,23 +20,17 @@ class UserController extends Controller
         parent::__construct();
     }
 
-    public function login()
+    /**
+     * @return void
+     */
+    public function login(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be POST");
         }
 
-        $jsonData = json_decode(file_get_contents('php://input'), true);
-        if ($jsonData === null) {
-            $this->sendErrorResponse(400, "Invalid JSON format");
-        }
-
-        // Validar que la solicitud contenga los campos requeridos
         $requiredFields = ["username", "password"];
-        $valido = Utils::validateArrayData($requiredFields, $jsonData);
-        if ($valido["valido"] === false) {
-            $this->sendErrorResponse(400, $valido["message"]);
-        }
+        $jsonData = $this->getJsonData($requiredFields);
 
         try {
             // Mapear los datos del user al UserDTO
@@ -49,7 +45,7 @@ class UserController extends Controller
                 $this->sendErrorResponse(404, "User not found", "The username not exist");
             }
 
-            // Verificar el pasword
+            // Verificar el password
             if (!password_verify(Utils::validateData($jsonData['password']), $userExist->password)) {
                 $this->sendErrorResponse(401, "Unauthorized", "Invalid credentials");
             }
@@ -78,22 +74,19 @@ class UserController extends Controller
         }
     }
 
-    public function findAll()
+    /**
+     * @return void
+     */
+    public function findAll(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be GET");
         }
 
         // Decodificar el token
-        $jwt = User::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
+        $this->validateJWT('ADMIN');
 
-        if ($jwt['role'] !== 'ADMIN') {
-            $this->sendErrorResponse(401, "Unauthorized");
-        }
-
+        $users = [];
         try {
             $users = User::findAll();
         } catch (Exception $e) {
@@ -109,26 +102,24 @@ class UserController extends Controller
         exit();
     }
 
-    public function findByID($id)
+    /**
+     * @param $id
+     * @return void
+     */
+    public function findByID($id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be GET");
         }
 
         // Decodificar el token
-        $jwt = User::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
-
-        if ($jwt['role'] !== 'ADMIN') {
-            $this->sendErrorResponse(401, "Unauthorized");
-        }
+        $this->validateJWT('ADMIN');
 
         if ($id === "") {
             $this->sendErrorResponse(400, "Missing ID parameter");
         }
 
+        $user = false;
         try {
             $user = User::findByID(Utils::validateData($id));
         } catch (Exception $e) {
@@ -148,33 +139,21 @@ class UserController extends Controller
         exit();
     }
 
-    public function createUser()
+    /**
+     * @return void
+     */
+    public function createUser(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be POST");
         }
 
         // Decodificar el token
-        $jwt = User::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
-
-        if ($jwt['role'] !== 'ADMIN') {
-            $this->sendErrorResponse(401, "Unauthorized");
-        }
-
-        $jsonData = json_decode(file_get_contents('php://input'), true);
-        if ($jsonData === null) {
-            $this->sendErrorResponse(400, "Invalid JSON format");
-        }
+        $this->validateJWT('ADMIN');
 
         // Validar que la solicitud contenga los campos requeridos
         $requiredFields = ["username", "password", "user_email"];
-        $valido = Utils::validateArrayData($requiredFields, $jsonData);
-        if ($valido["valido"] === false) {
-            $this->sendErrorResponse(400, $valido["message"]);
-        }
+        $jsonData = $this->getJsonData($requiredFields);
 
         try {
             // Encriptar la contraseña:
@@ -208,7 +187,13 @@ class UserController extends Controller
         }
     }
 
-    private function sendErrorResponse($code, $message, $detail = "")
+    /**
+     * @param int $code
+     * @param string $message
+     * @param string $detail
+     * @return void
+     */
+    #[NoReturn] private function sendErrorResponse(int $code, string $message, string $detail = ""): void
     {
         header('Content-Type: application/json');
         http_response_code($code);
@@ -217,5 +202,42 @@ class UserController extends Controller
             "detail" => $detail
         ]);
         exit();
+    }
+
+    /**
+     * @param string $permissions
+     * @return void
+     */
+    private function validateJWT(string $permissions = ''): void
+    {
+        $jwt = User::decodeJWT();
+        if ($jwt === null) {
+            $this->sendErrorResponse(401, "Unauthorized token");
+        }
+
+        if ($permissions !== '') {
+            if ($jwt['role'] !== $permissions) {
+                $this->sendErrorResponse(401, "Unauthorized");
+            }
+        }
+    }
+
+    /**
+     * @param array $requiredFields
+     * @return mixed
+     */
+    private function getJsonData(array $requiredFields): mixed
+    {
+        $jsonData = json_decode(file_get_contents('php://input'), true);
+        if ($jsonData === null) {
+            $this->sendErrorResponse(400, "Invalid JSON format");
+        }
+
+        // Validar que la solicitud contenga los campos requeridos
+        $valido = Utils::validateArrayData($requiredFields, $jsonData);
+        if ($valido["valido"] === false) {
+            $this->sendErrorResponse(400, $valido["message"]);
+        }
+        return $jsonData;
     }
 }

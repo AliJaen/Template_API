@@ -2,7 +2,7 @@
 
 class DatabaseConnection
 {
-    private $dbh;
+    private PDO $dbh;
 
     public function __construct()
     {
@@ -22,7 +22,10 @@ class DatabaseConnection
         }
     }
 
-    public function getConnection()
+    /**
+     * @return PDO
+     */
+    public function getConnection(): PDO
     {
         return $this->dbh;
     }

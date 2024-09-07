@@ -7,6 +7,9 @@ class Categoria extends Model
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public static function findAll(): array
     {
         $sql = "SELECT * FROM categoria";
@@ -23,6 +26,10 @@ class Categoria extends Model
         return $categorias;
     }
 
+    /**
+     * @param int $categoriaID
+     * @return CategoriaDTO|false
+     */
     public static function findByID(int $categoriaID): CategoriaDTO | false
     {
         $sql = "SELECT * FROM categoria WHERE id_categoria = :id_categoria";
@@ -33,11 +40,14 @@ class Categoria extends Model
         }
 
         // siempre retornará al menos 1, por tanto se forza a retornar el primero
-        $categoriaDTO = parent::mapToDTO($categoriasData[0], CategoriaDTO::class);
-
-        return $categoriaDTO;
+        return parent::mapToDTO($categoriasData[0], CategoriaDTO::class);
     }
 
+    /**
+     * @param CategoriaDTO $categoriaDTO
+     * @return string|false
+     * @throws Exception
+     */
     public static function createCategoria(CategoriaDTO $categoriaDTO): string | false
     {
         try {
@@ -64,7 +74,12 @@ class Categoria extends Model
         }
     }
 
-    public static function updateCategoria(CategoriaDTO $categoriaDTO)
+    /**
+     * @param CategoriaDTO $categoriaDTO
+     * @return bool
+     * @throws Exception
+     */
+    public static function updateCategoria(CategoriaDTO $categoriaDTO): bool
     {
         try {
             // Iniciar la transacción

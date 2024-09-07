@@ -1,5 +1,7 @@
 <?php
 
+use JetBrains\PhpStorm\NoReturn;
+
 // Configuración CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, OPTIONS");
@@ -14,7 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 class Error404 extends Controller
 {
-    public function index()
+    /**
+     * @return void
+     */
+    #[NoReturn] public function index(): void
     {
         header('Content-Type: application/json');
         http_response_code(404);

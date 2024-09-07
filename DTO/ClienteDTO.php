@@ -2,9 +2,9 @@
 
 class ClienteDTO
 {
-    public $id_cliente;
-    public $nombre_cliente;
-    public $num_cliente;
+    public int | null $id_cliente;
+    public string | null $nombre_cliente;
+    public string | null $num_cliente;
 
     public function __construct($id_cliente = null, $nombre_cliente = null, $num_cliente = null)
     {

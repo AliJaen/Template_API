@@ -7,12 +7,17 @@ class Producto extends Model
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public static function findAll(): array
     {
         $sql = "SELECT p.*, c.*
                 FROM producto AS p
                 LEFT JOIN categoria AS c ON p.categoria = c.id_categoria";
         $productosData = parent::query($sql);
+
+        $productos = [];
 
         foreach ($productosData as $data) {
             $productoDTO = parent::mapToDTO($data, ProductoDTO::class);
@@ -27,6 +32,10 @@ class Producto extends Model
         return $productos;
     }
 
+    /**
+     * @param int $productoID
+     * @return ProductoDTO|false
+     */
     public static function findByID(int $productoID): ProductoDTO | false
     {
         $sql = "SELECT p.*, c.*
@@ -48,6 +57,9 @@ class Producto extends Model
         return $productoDTO;
     }
 
+    /**
+     * @throws Exception
+     */
     public static function createProducto(ProductoDTO $productoDTO): string | false
     {
         try {
@@ -75,7 +87,10 @@ class Producto extends Model
         }
     }
 
-    public static function updateProducto(ProductoDTO $productoDTO)
+    /**
+     * @throws Exception
+     */
+    public static function updateProducto(ProductoDTO $productoDTO): bool
     {
         try {
             // Iniciar la transacción

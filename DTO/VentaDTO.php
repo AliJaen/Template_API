@@ -4,11 +4,11 @@ require_once 'VentaProductoDTO.php';
 
 class VentaDTO
 {
-    public $id_venta;
-    public $cliente;
-    public $folio;
-    public $fecha;
-    public $total;
+    public int | null $id_venta;
+    public ClienteDTO | int | null $cliente;
+    public string | null $folio;
+    public string | null $fecha;
+    public int | null $total;
     public $productos = [];
 
     public function __construct($id_venta = null, ClienteDTO $cliente = null, $folio = null, $fecha = null, $total = null)

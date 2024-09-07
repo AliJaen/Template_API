@@ -2,10 +2,10 @@
 
 class UserDTO
 {
-    public $id_user;
-    public $username;
-    public $password;
-    public $user_email;
+    public string | null $id_user;
+    public string | null $username;
+    public string | null $password;
+    public string | null $user_email;
 
     public function __construct($id_user = null, $username = null, $password = null, $user_email = null)
     {

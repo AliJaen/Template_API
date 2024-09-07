@@ -6,7 +6,7 @@ use Firebase\JWT\Key;
 
 class Model
 {
-    protected static $db;
+    protected static PDO $db;
 
     public function __construct()
     {
@@ -15,7 +15,10 @@ class Model
         $this->cargaDTO();
     }
 
-    public function cargaDTO()
+    /**
+     * @return void
+     */
+    public function cargaDTO(): void
     {
         $dto = get_class($this) . "DTO";
         $ruta = "DTO/{$dto}.php";
@@ -26,16 +29,24 @@ class Model
         }
     }
 
-    public static function query(string $sql, $params = [])
+    /**
+     * @param string $sql
+     * @param $params
+     * @return array|false
+     */
+    public static function query(string $sql, $params = []): array | false
     {
         $stmt = self::$db->prepare($sql);
         $stmt->execute($params);
-        $resutl = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return $resutl;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function mapToDTO(array $data, string $dtoClass)
+    /**
+     * @param array $data
+     * @param string $dtoClass
+     * @return mixed
+     */
+    public static function mapToDTO(array $data, string $dtoClass): mixed
     {
         $dto = new $dtoClass();
 
@@ -54,13 +65,19 @@ class Model
      * @param string $pass La contraseña a hashear
      * @return string $pass_crypt El hash de la contraseña
      */
-    public static function cryptPass($pass): string
+    public static function cryptPass(string $pass): string
     {
-        $pass_crypt = password_hash($pass, PASSWORD_DEFAULT);
-        return $pass_crypt;
+        return password_hash($pass, PASSWORD_DEFAULT);
     }
 
-    public static function generateJWT($id, $email, $role, $username)
+    /**
+     * @param $id
+     * @param $email
+     * @param $role
+     * @param $username
+     * @return string
+     */
+    public static function generateJWT($id, $email, $role, $username): string
     {
         $time = time();
         $payload = [
@@ -81,7 +98,10 @@ class Model
         return $jwt;
     }
 
-    public static function decodeJWT()
+    /**
+     * @return array|array[]|string[]|string[][]|null
+     */
+    public static function decodeJWT(): ?array
     {
         $header = apache_request_headers();
 
@@ -99,8 +119,7 @@ class Model
 
                 $role = str_replace('ROLE_', '', $decode->authorities); // Retirar el prefijo ROLE_
                 $dataUser = get_object_vars($decode->data);
-                $dataUser = array_merge($dataUser, ["role" => $role]);
-                return $dataUser;
+                return array_merge($dataUser, ["role" => $role]);
             } catch (Exception $e) {
                 return null;
             }

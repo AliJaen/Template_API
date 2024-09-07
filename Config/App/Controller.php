@@ -7,7 +7,10 @@ class Controller
         $this->cargarModel();
     }
 
-    public function cargarModel()
+    /**
+     * @return void
+     */
+    public function cargarModel(): void
     {
         $model = preg_replace('/Controller$/', '', get_class($this));
         $ruta = "Models/{$model}.php";

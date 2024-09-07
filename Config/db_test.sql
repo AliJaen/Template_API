@@ -118,8 +118,8 @@ INSERT INTO `venta` (`cliente`, `folio`, `fecha`, `total`) VALUES (3, 'VENTA-003
 
 INSERT INTO `venta_producto` (`id_venta`, `id_producto`, `cantidad`, `precio`) VALUES 
 (1, 3, 2, 1000), -- 2 laptops a $1000 cada una en la venta 1
-(1, 6, 1, 50);  -- 1 paquete de papas en la venta 1
-(1, 2, 1, 80);  -- 1 destornillador en la venta 1
+(1, 6, 1, 50),  -- 1 paquete de papas en la venta 1
+(1, 2, 1, 80),  -- 1 destornillador en la venta 1
 (1, 1, 1, 120);  -- 1 destornillador en la venta 1
 
 INSERT INTO `venta_producto` (`id_venta`, `id_producto`, `cantidad`, `precio`) VALUES 

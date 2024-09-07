@@ -7,6 +7,9 @@ class User extends Model
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public static function findAll(): array
     {
         $sql = "SELECT * FROM user";
@@ -23,6 +26,10 @@ class User extends Model
         return $users;
     }
 
+    /**
+     * @param string $userID
+     * @return UserDTO|false
+     */
     public static function findByID(string $userID): UserDTO | false
     {
         $sql = "SELECT * FROM user WHERE id_user = :id_user";
@@ -33,11 +40,13 @@ class User extends Model
         }
 
         // siempre retornamrá al mnos 1, por tanto se forza a retornar el primero
-        $userDTO = parent::mapToDTO($userData[0], UserDTO::class);
-
-        return $userDTO;
+        return parent::mapToDTO($userData[0], UserDTO::class);
     }
 
+    /**
+     * @param UserDTO $userDTO
+     * @return UserDTO|false
+     */
     public static function findByUsername(UserDTO $userDTO): UserDTO | false
     {
         $sql = "SELECT * FROM user WHERE username = :username";
@@ -48,11 +57,14 @@ class User extends Model
         }
 
         // siempre retornamrá al mnos 1, por tanto se forza a retornar el primero
-        $userDTO = parent::mapToDTO($userData[0], UserDTO::class);
-
-        return $userDTO;
+        return parent::mapToDTO($userData[0], UserDTO::class);
     }
 
+    /**
+     * @param UserDTO $userDTO
+     * @return string|false
+     * @throws Exception
+     */
     public static function createUser(UserDTO $userDTO): string | false
     {
         try {

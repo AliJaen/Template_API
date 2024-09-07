@@ -1,5 +1,7 @@
 <?php
 
+use JetBrains\PhpStorm\NoReturn;
+
 // Configuración CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, OPTIONS");
@@ -18,18 +20,19 @@ class VentaController extends Controller
         parent::__construct();
     }
 
-    public function findAll()
+    /**
+     * @return void
+     */
+    public function findAll(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             $this->sendErrorResponse(405, "Method not allowed");
         }
 
         // Decodificar el token
-        $jwt = Venta::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
+        $this->validateJWT();
 
+        $ventas = [];
         try {
             $ventas = Venta::findAll();
         } catch (Exception $e) {
@@ -45,22 +48,24 @@ class VentaController extends Controller
         exit();
     }
 
-    public function findByID($id)
+    /**
+     * @param $id
+     * @return void
+     */
+    public function findByID($id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             $this->sendErrorResponse(405, "Method not allowed");
         }
 
         // Decodificar el token
-        $jwt = Venta::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
+        $this->validateJWT();
 
         if ($id === "") {
             $this->sendErrorResponse(400, "Missing ID parameter");
         }
 
+        $venta = false;
         try {
             $venta = Venta::findByID(Utils::validateData($id));
         } catch (Exception $e) {
@@ -80,7 +85,10 @@ class VentaController extends Controller
         exit();
     }
 
-    public function createVenta()
+    /**
+     * @return void
+     */
+    public function createVenta(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->sendErrorResponse(405, "Method not allowed");
@@ -92,12 +100,6 @@ class VentaController extends Controller
             $this->sendErrorResponse(401, "Unauthorized token");
         }
 
-        $jsonData = json_decode(file_get_contents('php://input'), true);
-        if ($jsonData === null) {
-            $this->sendErrorResponse(400, "Invalid JSON format");
-        }
-
-        // Validar que la solicitud contenga los campos requeridos
         $requiredFields = [
             "cliente" => [
                 "id_cliente",
@@ -106,10 +108,7 @@ class VentaController extends Controller
             ],
             "total",
         ];
-        $valido = Utils::validateArrayData($requiredFields, $jsonData);
-        if ($valido["valido"] === false) {
-            $this->sendErrorResponse(400, $valido["message"]);
-        }
+        $jsonData = $this->getJsonData($requiredFields);
 
         // Validar que el cliente existe
         try {
@@ -164,10 +163,10 @@ class VentaController extends Controller
         }
 
         try {
-            // Mapera los datos de la venta a la VentaDTO
+            // Mapea los datos de la venta a la VentaDTO
             $ventaDTO = new VentaDTO();
             $ventaDTO->total = Utils::validateData($jsonData['total']);
-            // Mapera los datos del cliente al ClienteDTO
+            // Mapea los datos del cliente al ClienteDTO
             $clienteDTO = new ClienteDTO();
             $clienteDTO->id_cliente = Utils::validateData($jsonData['cliente']['id_cliente']);
             $clienteDTO->nombre_cliente = Utils::validateData($jsonData['cliente']['nombre_cliente']);
@@ -207,7 +206,13 @@ class VentaController extends Controller
         }
     }
 
-    private function sendErrorResponse($code, $message, $detail = "")
+    /**
+     * @param int $code
+     * @param string $message
+     * @param string $detail
+     * @return void
+     */
+    #[NoReturn] private function sendErrorResponse(int $code, string $message, string $detail = ""): void
     {
         header('Content-Type: application/json');
         http_response_code($code);
@@ -216,5 +221,35 @@ class VentaController extends Controller
             "detail" =>  $detail
         ]);
         exit();
+    }
+
+    /**
+     * @return void
+     */
+    private function validateJWT(): void
+    {
+        $jwt = Venta::decodeJWT();
+        if ($jwt === null) {
+            $this->sendErrorResponse(401, "Unauthorized token");
+        }
+    }
+
+    /**
+     * @param array $requiredFields
+     * @return mixed
+     */
+    private function getJsonData(array $requiredFields): mixed
+    {
+        $jsonData = json_decode(file_get_contents('php://input'), true);
+        if ($jsonData === null) {
+            $this->sendErrorResponse(400, "Invalid JSON format");
+        }
+
+        // Validar que la solicitud contenga los campos requeridos
+        $valido = Utils::validateArrayData($requiredFields, $jsonData);
+        if ($valido["valido"] === false) {
+            $this->sendErrorResponse(400, $valido["message"]);
+        }
+        return $jsonData;
     }
 }

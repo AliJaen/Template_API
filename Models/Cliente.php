@@ -7,6 +7,9 @@ class Cliente extends Model
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public static function findAll(): array
     {
         $sql = "SELECT * FROM cliente";
@@ -23,6 +26,10 @@ class Cliente extends Model
         return $clientes;
     }
 
+    /**
+     * @param int $clienteID
+     * @return ClienteDTO|false
+     */
     public static function findByID(int $clienteID): ClienteDTO | false
     {
         $sql = "SELECT * FROM cliente WHERE id_cliente = :id_cliente";
@@ -33,11 +40,14 @@ class Cliente extends Model
         }
 
         // siempre retornará al menos 1, por tanto se forza a retornar el primero
-        $clienteDTO = parent::mapToDTO($clientesData[0], ClienteDTO::class);
-
-        return $clienteDTO;
+        return parent::mapToDTO($clientesData[0], ClienteDTO::class);
     }
 
+    /**
+     * @param ClienteDTO $clienteDTO
+     * @return string|false
+     * @throws Exception
+     */
     public static function createCliente(ClienteDTO $clienteDTO): string | false
     {
         try {
@@ -65,7 +75,12 @@ class Cliente extends Model
         }
     }
 
-    public static function updateCliente(ClienteDTO $clienteDTO)
+    /**
+     * @param ClienteDTO $clienteDTO
+     * @return bool
+     * @throws Exception
+     */
+    public static function updateCliente(ClienteDTO $clienteDTO): bool
     {
         try {
             // Iniciar la transacción´

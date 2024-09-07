@@ -1,5 +1,7 @@
 <?php
 
+use JetBrains\PhpStorm\NoReturn;
+
 // Configuración CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, OPTIONS");
@@ -18,18 +20,19 @@ class CategoriaController extends Controller
         parent::__construct();
     }
 
-    public function findAll()
+    /**
+     * @return void
+     */
+    public function findAll(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be GET");
         }
 
         // Decodificar el token
-        $jwt = Categoria::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
+        $this->validateJWT();
 
+        $categorias = [];
         try {
             $categorias = Categoria::findAll();
         } catch (Exception $e) {
@@ -45,22 +48,24 @@ class CategoriaController extends Controller
         exit();
     }
 
-    public function findByID($id)
+    /**
+     * @param $id
+     * @return void
+     */
+    public function findByID($id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be GET");
         }
 
         // Decodificar el token
-        $jwt = Categoria::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
+        $this->validateJWT();
 
         if ($id === "") {
             $this->sendErrorResponse(400, "Missing ID parameter");
         }
 
+        $categoria = false;
         try {
             $categoria = Categoria::findByID(Utils::validateData($id));
         } catch (Exception $e) {
@@ -80,29 +85,19 @@ class CategoriaController extends Controller
         exit();
     }
 
-    public function createCategoria()
+    /**
+     * @return void
+     */
+    public function createCategoria(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be POST");
         }
 
         // Decodificar el token
-        $jwt = Categoria::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
+        $this->validateJWT();
 
-        $jsonData = json_decode(file_get_contents('php://input'), true);
-        if ($jsonData === null) {
-            $this->sendErrorResponse(400, "Invalid JSON format");
-        }
-
-        // Validar que la solicitud contenga los campos requeridos
-        $requiredFields = ["nombre_categoria"];
-        $valido = Utils::validateArrayData($requiredFields, $jsonData);
-        if ($valido["valido"] === false) {
-            $this->sendErrorResponse(400, $valido["message"]);
-        }
+        $jsonData = $this->getJsonData(["nombre_categoria"]);
 
         try {
             // Mapear los datos de la categoria a la CategoriaDTO
@@ -124,21 +119,24 @@ class CategoriaController extends Controller
         }
     }
 
-    public function updateCategoria($id)
+    /**
+     * @param $id
+     * @return void
+     */
+    public function updateCategoria($id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
             $this->sendErrorResponse(405, "Method not allowed", "Method must be PUT");
         }
 
         // Decodificar el token
-        $jwt = Categoria::decodeJWT();
-        if ($jwt === null) {
-            $this->sendErrorResponse(401, "Unauthorized token");
-        }
+        $this->validateJWT();
 
         if ($id === "") {
             $this->sendErrorResponse(400, "Missing ID parameter");
         }
+
+        $categoria = false;
 
         try {
             $categoria = Categoria::findByID(Utils::validateData($id));
@@ -150,17 +148,7 @@ class CategoriaController extends Controller
             $this->sendErrorResponse(400, "Categoria not found");
         }
 
-        $jsonData = json_decode(file_get_contents('php://input'), true);
-        if ($jsonData === null) {
-            $this->sendErrorResponse(400, "Invalid JSON format");
-        }
-
-        // Validar que la solicitud contenga los campos requeridos
-        $requiredFields = ["nombre_categoria"];
-        $valido = Utils::validateArrayData($requiredFields, $jsonData);
-        if ($valido["valido"] === false) {
-            $this->sendErrorResponse(400, $valido["message"]);
-        }
+        $jsonData = $this->getJsonData(["nombre_categoria"]);
 
         try {
             // Modificar la CategoriaDTO con los nuevos datos
@@ -182,7 +170,13 @@ class CategoriaController extends Controller
         }
     }
 
-    private function sendErrorResponse($code, $message, $detail = "")
+    /**
+     * @param int $code
+     * @param string $message
+     * @param string $detail
+     * @return void
+     */
+    #[NoReturn] private function sendErrorResponse(int $code, string $message, string $detail = ""): void
     {
         header('Content-Type: application/json');
         http_response_code($code);
@@ -191,5 +185,35 @@ class CategoriaController extends Controller
             "detail" => $detail
         ]);
         exit();
+    }
+
+    /**
+     * @return void
+     */
+    private function validateJWT(): void
+    {
+        $jwt = Categoria::decodeJWT();
+        if ($jwt === null) {
+            $this->sendErrorResponse(401, "Unauthorized token");
+        }
+    }
+
+    /**
+     * @param array $requiredFields
+     * @return mixed
+     */
+    public function getJsonData(array $requiredFields): mixed
+    {
+        $jsonData = json_decode(file_get_contents('php://input'), true);
+        if ($jsonData === null) {
+            $this->sendErrorResponse(400, "Invalid JSON format");
+        }
+
+        // Validar que la solicitud contenga los campos requeridos
+        $valido = Utils::validateArrayData($requiredFields, $jsonData);
+        if ($valido["valido"] === false) {
+            $this->sendErrorResponse(400, $valido["message"]);
+        }
+        return $jsonData;
     }
 }

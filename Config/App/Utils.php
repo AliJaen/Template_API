@@ -13,8 +13,7 @@ class Utils
         // Elimina espacios innecesarios al principio y al final
         $value = trim($value);
         // Sanitiza los datos con htmlspecialchars para evitar inyecciones HTML
-        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-        return $value;
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -44,7 +43,7 @@ class Utils
                     // Validar un campo simple
                     if (isset($data[$campo])) {
                         $campoSaneado = self::validateData($data[$campo]);
-                        if ($campoSaneado === "" || $campoSaneado === null) {
+                        if ($campoSaneado === "") {
                             return ["valido" => false, "message" => "Missing or empty parameter $campo"];
                         }
                     } else {
@@ -67,17 +66,17 @@ class Utils
     {
         // Determinar el momento actual para establecer como HORA DE CANCELACIÓN
         date_default_timezone_set('America/Mazatlan');
-        $now = date('Y-m-d H:i:s');
-
-        return $now;
+        return date('Y-m-d H:i:s');
     }
 
     /**
      * Función para generar folios, números de cliente,
      * entre otros datos que deben tener un valor único
-     * 
+     *
      * @param int $tipo es el correspondiente al tipo de
      *              valor que desea generar
+     * @return string $folio Es el folio generado
+     * @throws Exception
      */
     public static function generaFolio(int $tipo): string
     {
@@ -93,6 +92,7 @@ class Utils
     /**
      * Función para generar un UUID
      * @return string UUID v4.0 according to RFC 4122
+     * @throws Exception
      */
     public static function generateUUID(): string
     {

@@ -3,9 +3,9 @@ require_once 'CategoriaDTO.php';
 
 class ProductoDTO
 {
-    public $id_producto;
-    public $nombre_producto;
-    public $categoria;
+    public int | null $id_producto;
+    public string | null $nombre_producto;
+    public CategoriaDTO | int | null $categoria;
 
     public function __construct($id_producto = null, $nombre_producto = null,  CategoriaDTO $categoria = null)
     {

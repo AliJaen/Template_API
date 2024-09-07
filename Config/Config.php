@@ -1,19 +1,17 @@
 <?php
 
-const base_url = 'http://192.168.1.119/testTemplate';
-const host_ws = 'localhost';
-const port_ws = 8080;
+const base_url = 'YOUR_URL_BASE';
 
 /**
  * DB constants
  */
-const DB_HOST = "localhost";
-const DB_NAME = "pruebaid"; // Es la base de datos por defecto, pero el constructor de la conección acepta una base de datos para manejar diferentes bases de datos en el mismo proyecto
-const DB_USER = "root"; // Usa el usuario correspondiente
-const DB_PASSWORD = "mYp@ssW0rd"; // Modifica la contraseña configurada en tu servidor
+const DB_HOST = "YOUR_HOST";
+const DB_NAME = "prueba"; // Es la base de datos por defecto, adaptar a la base de datos requerida
+const DB_USER = "YOUR_USER"; // Usa el usuario correspondiente
+const DB_PASSWORD = "YOUR_PASSWORD"; // Modifica la contraseña configurada en tu servidor
 const DB_CHARSET = "utf8";
-const KEY_SIGNATURE = "d756468975ccf5f5c2567f2a00d3a0afe4096370329421ad5afd5bd28da8c6a7";
-const SIGNER = "JWTTEST-BACKEND";
+const KEY_SIGNATURE = "YOUR_SIGNARUTE";
+const SIGNER = "YOUR_SIGNER";
 
 /**
  * Directorios de la APP
